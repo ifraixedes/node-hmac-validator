@@ -1,0 +1,23 @@
+{
+  "name": "hmac-validator",
+  "version": "0.0.1",
+  "description": "Generic HMAC signature validator for strings or JS Objects",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/ifraixedes/node-hmac-validator.git"
+  },
+  "keywords": [
+    "HMAC",
+    "validator"
+  ],
+  "author": "Ivan Fraixedes <ivan@fraixed.es> (http://ivan.fraixed.es)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ifraixedes/node-hmac-validator/issues"
+  },
+  "homepage": "https://github.com/ifraixedes/node-hmac-validator#readme"
+}
