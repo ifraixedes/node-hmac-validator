@@ -1,7 +1,7 @@
 {
   "name": "hmac-validator",
   "version": "0.0.1",
-  "description": "Generic HMAC signature validator for strings or JS Objects",
+  "description": "Generic HMAC signature validator for query strings and JS Objects",
   "main": "src/hmac-validator.js",
   "scripts": {
     "test": "mocha -R spec test",
