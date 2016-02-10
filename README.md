@@ -61,6 +61,15 @@ The returned function accept 2 or 3 parameters depending if `digestKey` configur
 
 When `digestKey` is provided, the function accepts 2 parameters (the secret and payload), the signature to compare the calculated HMAC digest, is self contained in the same payload; the module exclude automatically this key from the payload, so it isn't needed to add in the `excludedKeys` list; otherwise the function requires 3 parameters, those 2 and the signature to compare the calculated HMAC digest.
 
+### Other considerations
+
+The exported function does a few checks on the configuration object, however they aren't bulletproof and I don't plan to do it, having to full check each types of any configuration parameter and value; I added some to may help to detect basic misconfigurations which can lead to waste time trying to spot a misusage of this module in the library or application which uses this module.
+
+The same happens with the returned function, but on it there is another __minimal consideration__, performance; as it's probably a function that the library or application which uses this module, will call it over and over.
+
+Basically I expect that who uses this module, will read the documentation and use it as it's defined.
+
+You can see those checks in the file [src/hmac-validator.js](https://github.com/ifraixedes/node-hmac-validator/blob/master/src/hmac-validator.js) in two functions, `checkConfig` which check the configuration object and `compileReplacements` which transforms, and at the same time check,§ the `replacements` configuration parameters in the internal data structure used by the returned HMAC validator function.
 
 Check the test specs in the [test folder](https://github.com/ifraixedes/node-hmac-validator/tree/master/test) to see more examples.
 
