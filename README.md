@@ -89,7 +89,7 @@ See [Roadmap](#roadmap) for the next steps to check and make changes to achieve 
 ## Roadmap
 
 1. Verify if it supports [Twilio Digest Authentication validation](https://www.twilio.com/docs/api/security) writing the needed test cases; if it doesn't pass the new test specs, then make the changes to pass it.
-2. Verify if it supports [Twilio Digest Authentication validation](https://www.twilio.com/docs/api/security) writing the needed test cases; if it doesn't pass the new test specs, then make the changes to pass it.
+2. Verify if it supports [Pusher Authentication signatures](https://pusher.com/docs/auth_signatures) writing the needed test cases; if it doesn't pass the new test specs, then make the changes to pass it.
 
 ## Development
 
