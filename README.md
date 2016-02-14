@@ -53,13 +53,25 @@ The module exports a function which accepts an Object with the next configuratio
   The three of them accept __one character property name__ with a string property value; the property name defines the character to replaced by the sting set as property value of the payload (message) to calculate and compare the HMAC digest signature
 
   The replacements are done on the payload, `key` replace the values only in keys of the payload, `values` on their values and `both` in the both of them.
-* [`digestKey`]: The name of the key to find in the payload which contains the original HMAC digest value, which is used to check if the signature is valid, therefore the message is coming from the trusted source. Default to `null`.
+* [`digestKey`]: The name of the key to find in the payload which contains the original HMAC digest value, which is used to check if the signature is valid, therefore the message is coming from the trusted source. For obvious reasons, if the payload self contains the digest Key, it will be automatically excluded from it, before calculating the digest, so it isn't needed to be added to `excludedKeys` list. Default to `null`.
 
-After the function is called with the configuration object a new function is returned to validate the signature for different payloads and secrets if you want, although the secret probably doesn't change, because it's used on each call I thought that it offer more flexibility if it's provided on each call than setting it in the configuration object.
+After the function is called, a [validator function](#validator-function) is returned.
+
+### Validator function
+
+Validator function allow to validate the signature for different payloads and secrets, [applying the specified configuration which has created it](#configuration-parameters).
 
 The returned function accept 2 or 3 parameters depending if `digestKey` configuration parameter has been set.
 
-When `digestKey` is provided, the function accepts 2 parameters (the secret and payload), the signature to compare the calculated HMAC digest, is self contained in the same payload; the module exclude automatically this key from the payload, so it isn't needed to add in the `excludedKeys` list; otherwise the function requires 3 parameters, those 2 and the signature to compare the calculated HMAC digest.
+When `digestKey` is provided, the function accepts 2 parameters (the secret and payload), the signature to compare the calculated HMAC digest, is self contained in the same payload (specified by `digestKey` configuration parameter); otherwise the function requires 3 parameters, those 2 and the signature to compare the calculated HMAC digest.
+
+The payload can be:
+
+* A String: the value should be a valid query string (it's parsed with `querystring` NodeJS API module).
+* An Object: use as a map (key / value); both are converted to Javascript strings, so if some of them isn't one of [the types](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Data_types) whose string representation matches your expectations, then you should have to override `toString` method, for example if you have keys with an Object value.
+
+You may notice that the `secret` isn't probably to change during the functions life, so it could be set as a configuration parameter, however I thought that providing it, as a parameter on each call, has more flexibility, allowing to change it without creating a new validator function; The difference, between `secret` and all the configuration parameters, is that consumers can generate one at any time, meanwhile the configurations parameters values are totally defined by the provider.
+
 
 ### Other considerations
 
@@ -90,6 +102,7 @@ See [Roadmap](#roadmap) for the next steps to check and make changes to achieve 
 
 1. Verify if it supports [Twilio Digest Authentication validation](https://www.twilio.com/docs/api/security) writing the needed test cases; if it doesn't pass the new test specs, then make the changes to pass it.
 2. Verify if it supports [Pusher Authentication signatures](https://pusher.com/docs/auth_signatures) writing the needed test cases; if it doesn't pass the new test specs, then make the changes to pass it.
+3. Decide to keep or deprecate if validator function accepts query strings and only reduce it to accept Maps (Object with a key & values String types).
 
 ## Development
 
