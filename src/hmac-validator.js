@@ -15,11 +15,13 @@ const encoding = 'ascii';
  *      look which ones are required and accepted
  * @returns {Function} which compute the digest and compare it to return true or false if they match.
  *      Returned function accepts as parameters:
- *         - Secret: the share secret to use to compute the digest
- *         - Object or string: in case of string it will be parsed with querystrint to transform in an object
- *         - [digest]: Digest to compare, not required if configuration specified `digestKeys` parameter, which
+ *         - {string} Secret: the share secret to use to compute the digest
+ *         - {string} Prefix: it will be prepended (without any transformation) to the payload before calculating
+ *              the digest signature.
+ *         - {Object|string} Payload: in case of string it will be parsed with querystrint to transform in an object
+ *         - {string} [digest]: Digest to compare, not required if configuration specified `digestKeys` parameter, which
  *              defines the key inside of the object to check which has the digest value
- *  NOTE: Only object with value string properties are supported to check hmac digest
+ *  NOTE: Payload is only an object with string value properties.
  */
 function createValidator(config) {
   checkConfig(config);
@@ -38,25 +40,31 @@ function createValidator(config) {
     excludedKeys.add(config.digestKey);
   }
 
-  return function (secret, payload, digest) {
-    let pobj = payloadToObject(payload);
+  return function (secret, prefix, payload, digest) {
+    let message = (prefix) ? prefix : '';
 
-    if (!digest) {
-      if (!digestKey) {
-        throw new Error('Digest should be provided because not digest key was set');
-      } else {
-        digest = pobj[digestKey];
+    if (payload) {
+      let pobj = payloadToObject(payload);
+
+      if (!digest) {
+        if (!digestKey) {
+          throw new Error('Digest should be provided because not digest key was set');
+        } else {
+          digest = pobj[digestKey];
+        }
       }
-    }
 
-    pobj = removeExcludedKeys(excludedKeys, pobj);
+      pobj = removeExcludedKeys(excludedKeys, pobj);
 
-    if (replacements) {
-      pobj = makeReplacements(replacements, pobj);
+      if (replacements) {
+        pobj = makeReplacements(replacements, pobj);
+      }
+
+      message += getDigestMessage(pobj, keyValueLink, pairsLink);
     }
 
     let hmac = crypto.createHmac(algorithm, secret);
-    hmac.update(getDigestMessage(pobj, keyValueLink, pairsLink), encoding);
+    hmac.update(message, encoding);
 
     return hmac.digest(format) === digest;
   };
