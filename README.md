@@ -99,7 +99,8 @@ On the other hand, some providers don't need almost any of the features offered 
 ```js
 const crypto = require('crypto');
 
-// `payload` is a string with the content to calculate the HMAC digest signature and `digest` the signature to verify (compare)
+// `payload` is a string with the content to calculate the HMAC digest signature
+// and `digest` the signature to verify (compare)
 let hmac = crypto.createHmac(algorithm, secret);
 hmac.update(payload, encoding);
 
