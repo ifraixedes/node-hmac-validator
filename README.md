@@ -30,7 +30,7 @@ let validate = hmacValidator({
 
 let digest = 'c2812f39f84c32c2edaded339a1388abc9829babf351b684ab797f04cd94d4c7';
 
-let isValid = validate(secret, {
+let isValid = validate(secret, null, {
   shop: 'some-shop.myshopify.com',
   timestamp: '1337178173',
   extra: '6e39a2ea9e497af6cb806720da1f1bf3'
@@ -61,17 +61,26 @@ After the function is called, a [validator function](#validator-function) is ret
 
 Validator function allow to validate the signature for different payloads and secrets, [applying the specified configuration which has created it](#configuration-parameters).
 
-The returned function accept 2 or 3 parameters depending if `digestKey` configuration parameter has been set.
+The returned function accept 3 or 4 parameters depending if `digestKey` configuration parameter has been set.
 
-When `digestKey` is provided, the function accepts 2 parameters (the secret and payload), the signature to compare the calculated HMAC digest, is self contained in the same payload (specified by `digestKey` configuration parameter); otherwise the function requires 3 parameters, those 2 and the signature to compare the calculated HMAC digest.
+When `digestKey` is provided, the function accepts 3 parameters (the secret, prefix, and payload), the signature to compare the calculated HMAC digest, is self contained in the same payload (specified by `digestKey` configuration parameter); otherwise the function requires 4 parameters, those 3 and the signature to compare the calculated HMAC digest.
 
-The payload can be:
+The __prefix is a string which is prepended to the payload after it has been processed and before the HMAC signature is computed to be validated__; some providers need a prefix and others don't; for example there are providers as [Twilio](https://www.twilio.com/docs/api/security) which calculate the signatures using the full URL concatenated with the request body with some processing, in this module, the full URL is prefix and the body is the payload and others, as [Shopify](https://docs.shopify.com/api/guides/authentication/oauth), which only use the URL parameters as the payload and anything more, so it doesn't need any prefix.
+
+If the provider doesn't need prefix, provide a `null` or empty `string`.
+
+The __payload__ can be:
 
 * A String: the value should be a valid query string (it's parsed with `querystring` NodeJS API module).
 * An Object: use as a map (key / value); both are converted to Javascript strings, so if some of them isn't one of [the types](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Data_types) whose string representation matches your expectations, then you should have to override `toString` method, for example if you have keys with an Object value.
 
-You may notice that the `secret` isn't probably to change during the functions life, so it could be set as a configuration parameter, however I thought that providing it, as a parameter on each call, has more flexibility, allowing to change it without creating a new validator function; The difference, between `secret` and all the configuration parameters, is that consumers can generate one at any time, meanwhile the configurations parameters values are totally defined by the provider.
+As the prefix, if it isn't required, provide a `null` value or empty `string`;
 
+On the other hand you may notice that the `secret` isn't probably to change during the functions life, so it could be set as a configuration parameter, however I thought that providing it, as a parameter on each call, has more flexibility, allowing to change it without creating a new validator function; The difference, between `secret` and all the configuration parameters, is that consumers can generate one at any time, meanwhile the configurations parameters values are totally defined by the provider.
+
+### Examples
+
+You can find 3 examples, written as mocha test cases which try to show the related part to calculate the signature for [Shopify](https://docs.shopify.com/api/guides/authentication/oauth), [Twilio](https://www.twilio.com/docs/api/security) and [Pusher](https://pusher.com/docs/auth_signatures), on [examples-test.js file](https://github.com/ifraixedes/node-hmac-validator/blob/master/test/examples-test.js).
 
 ### Other considerations
 
@@ -81,9 +90,24 @@ The same happens with the returned function, but on it there is another __minima
 
 Basically I expect that who uses this module, will read the documentation and use it as it's defined.
 
-You can see those checks in the file [src/hmac-validator.js](https://github.com/ifraixedes/node-hmac-validator/blob/master/src/hmac-validator.js) in two functions, `checkConfig` which check the configuration object and `compileReplacements` which transforms, and at the same time check,§ the `replacements` configuration parameters in the internal data structure used by the returned HMAC validator function.
+You can see those checks in the file [src/hmac-validator.js](https://github.com/ifraixedes/node-hmac-validator/blob/master/src/hmac-validator.js) in two functions, `checkConfig` which check the configuration object and `compileReplacements` which transforms, and at the same time check, the `replacements` configuration parameters in the internal data structure used by the returned HMAC validator function.
 
 Check the test specs in the [test folder](https://github.com/ifraixedes/node-hmac-validator/tree/master/test) to see more examples.
+
+On the other hand, some providers don't need almost any of the features offered by this module, even though it can be used, I don't see any benefit in using it if you app only need to verify one provider or several with the same conditions, because the verification carried by this modules is just:
+
+```js
+const crypto = require('crypto');
+
+// `payload` is a string with the content to calculate the HMAC digest signature and `digest` the signature to verify (compare)
+let hmac = crypto.createHmac(algorithm, secret);
+hmac.update(payload, encoding);
+
+const isValid = hmac.digest(format) === digest;
+```
+
+An example of this case is [Pusher](https://pusher.com/docs/auth_signatures), [there is an example of using this module to verify a Pusher signature](https://github.com/ifraixedes/node-hmac-validator/blob/master/test/examples-test.js#L89) however as I mentioned isn't worthwhile to use if you need to perform Pusher signature verifications.
+
 
 ## Requirements & dependencies
 
@@ -94,15 +118,14 @@ You need at least NodeJS v4.x as it's implemented with JS2015 (ES6) features, as
 
 This module was born of one implementation that I had to implement to verify [Shopiphy HMAC Signatures verification](https://docs.shopify.com/api/authentication/oauth) because I wasn't able to find a node module that allowed me to do only the HMAC validation; so I implemented it a bit generic with some of the configurable parameters that it currently offers.
 
-I extracted that first implementation to be and standalone module and publish it on NPM with the goal to provide a generic HMAC Signature validator which can handle most common cases (providers, services, etc... which uses an HMAC signature to guarantee the originator of requests), however, so far, I've only done the generalization that I've prognosticated based on the implementation for Shopify so I guess it may need more changes to be as generic as I desire.
+I extracted that first implementation to be and standalone module and publish it on NPM with the goal to provide a generic HMAC Signature validator which can handle most common cases (providers, services, etc... which uses an HMAC signature to guarantee the originator of requests).
 
-See [Roadmap](#roadmap) for the next steps to check and make changes to achieve more generalization.
+So far there are a few examples of verifying the signature with some providers, but I'm willing to know if somebody has tried to use for others and know if it is useful.
 
 ## Roadmap
 
-1. Verify if it supports [Twilio Digest Authentication validation](https://www.twilio.com/docs/api/security) writing the needed test cases; if it doesn't pass the new test specs, then make the changes to pass it.
-2. Verify if it supports [Pusher Authentication signatures](https://pusher.com/docs/auth_signatures) writing the needed test cases; if it doesn't pass the new test specs, then make the changes to pass it.
-3. Decide to keep or deprecate if validator function accepts query strings and only reduce it to accept Maps (Object with a key & values String types).
+1. Deprecate `replacements.both` and only use `keys` & `values`; if a character must be replaced in both, then set it in the two of them; it's simpler and clearer.
+2. Look for other providers and write an example in [examples-test.js file](https://github.com/ifraixedes/node-hmac-validator/blob/master/test/examples-test.js).
 
 ## Development
 

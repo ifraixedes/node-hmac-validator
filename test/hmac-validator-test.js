@@ -41,6 +41,7 @@ describe('hmac validator', () => {
 
     let c = validate(
       secret,
+      null,
       'shop=some-shop.myshopify.com&timestamp=1337178173&signature=6e39a2ea9e497af6cb806720da1f1bf3&hmac=c2812f39f84c32c2edaded339a1388abc9829babf351b684ab797f04cd94d4c7',
       digest);
 
@@ -51,7 +52,7 @@ describe('hmac validator', () => {
     let validate = hmacValidator(commonConfig);
 
     expect(
-      validate.bind(null, secret, 'shop=some-shop.myshopify.com&timestamp=1337178173&signature=6e39a2ea9e497af6cb806720da1f1bf3&hmac=c2812f39f84c32c2edaded339a1388abc9829babf351b684ab797f04cd94d4c7')
+      validate.bind(null, secret, null, 'shop=some-shop.myshopify.com&timestamp=1337178173&signature=6e39a2ea9e497af6cb806720da1f1bf3&hmac=c2812f39f84c32c2edaded339a1388abc9829babf351b684ab797f04cd94d4c7')
     ).to.throw(/Digest should be provided because not digest key was set/);
   });
 
@@ -61,7 +62,7 @@ describe('hmac validator', () => {
         digestKey: 'hmac'
       }));
 
-    let c = validate(secret, 'shop=some-shop.myshopify.com&timestamp=1337178173&signature=6e39a2ea9e497af6cb806720da1f1bf3&hmac=c2812f39f84c32c2edaded339a1388abc9829babf351b684ab797f04cd94d4c7');
+    let c = validate(secret, null, 'shop=some-shop.myshopify.com&timestamp=1337178173&signature=6e39a2ea9e497af6cb806720da1f1bf3&hmac=c2812f39f84c32c2edaded339a1388abc9829babf351b684ab797f04cd94d4c7');
     expect(c).to.be.true;
   });
 
@@ -69,7 +70,7 @@ describe('hmac validator', () => {
     let validate = hmacValidator(commonConfig);
     let digest = 'c2812f39f84c32c2edaded339a1388abc9829babf351b684ab797f04cd94d4c7';
 
-    let c = validate(secret, {
+    let c = validate(secret, null, {
       shop: 'some-shop.myshopify.com',
       timestamp: '1337178173',
       signature: '6e39a2ea9e497af6cb806720da1f1bf3'
@@ -82,7 +83,7 @@ describe('hmac validator', () => {
     let validate = hmacValidator(commonConfig);
     let digest = 'a2812f39f84c32c2edaded339a1388abc9829babf351b684ab797f04cd94d4c8';
 
-    let c = validate(secret, {
+    let c = validate(secret, null, {
       shop: 'some-shop.myshopify.com',
       timestamp: '1337178173',
       signature: '6e39a2ea9e497af6cb806720da1f1bf3'
@@ -95,7 +96,7 @@ describe('hmac validator', () => {
     let validate = hmacValidator(
       Object.assign({}, commonConfig, { digestKey: 'hmac' }));
 
-    let c = validate(secret, {
+    let c = validate(secret, null, {
       shop: 'some-shop.myshopify.com',
       timestamp: '1337178173',
       signature: '6e39a2ea9e497af6cb806720da1f1bf3',
@@ -109,7 +110,7 @@ describe('hmac validator', () => {
     let validate = hmacValidator(
       Object.assign({}, commonConfig, { digestKey: 'hmac', excludedKeys: ['signature'] }));
 
-    let c = validate(secret, {
+    let c = validate(secret, null, {
       shop: 'some-shop.myshopify.com',
       timestamp: '1337178173',
       signature: '6e39a2ea9e497af6cb806720da1f1bf3',
@@ -123,7 +124,7 @@ describe('hmac validator', () => {
     let validate = hmacValidator(
       Object.assign({}, commonConfig, { digestKey: 'hmac' }));
 
-    let c = validate(secret, {
+    let c = validate(secret, null, {
       shop: 'some-shop.myshopify.com',
       timestamp: '1337178173',
       signature: '6e39a2ea9e497af6cb806720da1f1bf3',
@@ -139,6 +140,7 @@ describe('hmac validator', () => {
 
     let c = validate(
       secret,
+      null,
       'shop=some-shop.myshopify.com&time%stamp=1337178173&sign^ature=6e39a2ea9e497af6cb806720da1f1bf3',
       digest);
 
@@ -151,6 +153,7 @@ describe('hmac validator', () => {
 
     let c = validate(
       secret,
+      null,
       'shop=some-shop.myshopify.com&timestamp=1337<17>8173&signature=6e39a2ea9e497af6cb806720da1f1bf3',
       digest);
 
@@ -163,6 +166,7 @@ describe('hmac validator', () => {
 
     let c = validate(
       secret,
+      null,
       'shop=some-shop.myshopify.com&time%stamp=1337<17>8173&signature=6e39a2ea9e497af6cb806720da1f1bf3',
       digest);
 
@@ -173,7 +177,7 @@ describe('hmac validator', () => {
     let validate = hmacValidator(
       Object.assign({}, commonConfig, { digestKey: 'hmac' }));
 
-    let c = validate(secret, {
+    let c = validate(secret, null, {
       'sh=op': 'some-shop.myshopify.com',
       timestamp: '&1337178173',
       hmac: '81d1af737a90ad690042ffa0ad92cbebb98ae38ba2892fcb7a87fe61faf11947'
@@ -189,6 +193,7 @@ describe('hmac validator', () => {
 
     let c = validate.bind(null,
       undefined,
+      null,
       'shop=some-shop.myshopify.com&timestamp=1337<17>8173&signature=6e39a2ea9e497af6cb806720da1f1bf3',
       digest);
 

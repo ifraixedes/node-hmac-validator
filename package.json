@@ -1,6 +1,6 @@
 {
   "name": "hmac-validator",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Generic HMAC signature validator for query strings and JS Objects",
   "main": "src/hmac-validator.js",
   "scripts": {
